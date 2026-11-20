@@ -111,6 +111,7 @@ export interface ReadUsdcTrustlineOptions {
   server?: { loadAccount: HorizonAccountLoader };
 }
 
+
 function resolveAccountLoader(
   options: HorizonAccountLoader | ReadUsdcTrustlineOptions,
 ): HorizonAccountLoader {
@@ -194,3 +195,15 @@ export async function ensureUsdcTrustline(
   const result = await horizon.submitTransaction(signed);
   return { added: true, hash: result.hash };
 }
+
+/**
+ * Fixture-friendly error classification for trustline submission outcomes.
+ * Lets callers and tests distinguish user rejection, account switch,
+ * timeout and late confirmation without a browser extension or live wallet.
+ */
+export type TrustlineSubmissionOutcome =
+  | { kind: "confirmed"; hash: string }
+  | { kind: "rejected" }
+  | { kind: "account_switched"; expected: string; actual: string }
+  | { kind: "timeout" }
+  | { kind: "late_confirmation"; hash: string };
